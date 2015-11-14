@@ -1,0 +1,10 @@
+---
+title: "Data collection and analysis"
+author: "CHJ Hartgerink"
+date: "14 november 2015"
+output: html_document
+---
+
+```{r downloading text from results sections}
+source('functions/download_results.R')
+```
