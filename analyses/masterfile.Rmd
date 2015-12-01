@@ -3,8 +3,45 @@ title: "Data collection and analysis"
 author: "CHJ Hartgerink"
 date: "14 november 2015"
 output: html_document
+bibliography: bibliography/bibliography.bib
 ---
 
-```{r downloading text from results sections}
+After speaking to Veronique Kiermer at the OpenCon2015 conference about potential programmatic applications to check submitted papers at PLOS for potential errors, we discussed how we might go about this. I started thinking that PLOS publishes many different areas of research and as such the type of results can vary tremendously. How best to get an indication of what results are reported in the PLOS collection of journals?
+
+```{r downloading text from results sections and reading it in, echo = FALSE}
+# Download all the results sections in PLOS
 source('functions/download_results.R')
+# Read in the resulting object in a dynamic way
+# old files stay stored in the folder and allows for rerunning everything easily
+load(sprintf('data/%s_resultstext', format(Sys.time(), "%Y%m%d")))
 ```
+
+First, the results sections need to be downloaded. With the `rplos` package [@Chamberlain2015-tg] this is readily done so and can be dynamically updated upon regenerating this `Rmarkdown` document. Flowing from this download, `r resultstext$meta$numFound` articles were identified to have results sections whose text was subsequently downloaded for the following steps.
+
+Second, what is defined as a result needs to be defined. Most logically, this is anything that directly precedes an equal sign, a greater than sign, or a less than sign. As such, results can be extracted as 
+
+```{r extracting result}
+for (i in 1:length(resultstext$data$results_and_discussion)){
+  # find all instances of [<>=]
+  signs <- gregexpr("\\s?[<>=]", resultstext$data$results_and_discussion[i])[[1]]
+  
+  
+  for (j in 1:length(signs)){
+    txt <- substr(x = resultstext$data$results_and_discussion[i], signs[j] - 50, signs[j] - attr(signs, "match.length")[j] + 1)
+    # find space
+    spaces <- gregexpr("[\\s\\(\\[\\{]", txt)[[1]]
+    cat(substr(txt, tail(spaces, 1) + attr(spaces, "match.length"), nchar(txt)))
+    cat("\n")
+  }
+}
+```
+
+Fourth, the set of results need to be extracted.
+
+Fifth, the extracted results need to be indexed and mapped onto a network matrix.
+
+Sixth, the network indices and plotted network need to be generated.
+
+This report focuses on mapping these results in a network, showing the most central and peripheral type of results reported in the results sections. As such, what is deemed a result has to be determined (note that only the results and discussion section are inspected). It is most certainly any numeric value preceded by an equal sign, but also others such as confidence intervals (e.g., `[12, 15]`) or 
+
+
